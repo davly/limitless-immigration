@@ -1,0 +1,19 @@
+# Binaries
+/limitless-immigration
+/limitless-immigration.exe
+*.exe
+
+# Go test + coverage artefacts
+*.test
+*.out
+coverage.html
+*.prof
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
