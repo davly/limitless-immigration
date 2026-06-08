@@ -11,9 +11,10 @@ import (
 
 // ExpectedPackages returns the canonical list of internal/ packages.
 // 7 packages: 5 cohort (firewall + honest + legal + manifest + mirrormark)
-// + 1 domain-gate (immigration-rules) + (legal is cohort, immigration-rules is domain).
+// + 2 domain (immigration-rules corpus-gate + eta per-nationality signal engine).
 func ExpectedPackages() []string {
 	return []string{
+		"eta",
 		"firewall",
 		"honest",
 		"immigration-rules",

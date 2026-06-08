@@ -45,7 +45,7 @@ func TestExpectedPackages_Unique(t *testing.T) {
 }
 
 func TestExpectedPackages_PinnedCount(t *testing.T) {
-	const expected = 6
+	const expected = 7 // +eta (iter: per-nationality ETA signal engine)
 	if got := len(ExpectedPackages()); got != expected {
 		t.Fatalf("got %d, want %d", got, expected)
 	}
