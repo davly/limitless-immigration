@@ -89,14 +89,41 @@ func Classify(nationalityISO3 string, travelDate time.Time, table []ETARule) (ET
 			return sig, true
 		}
 		sig.EffectiveFrom = r.EffectiveFrom
-		if travelDate.Before(r.EffectiveFrom) {
+		// EffectiveFrom models a published gov.uk CALENDAR wave date (e.g. via
+		// time.Parse("2006-01-02")), so the in-force test is a CALENDAR-DATE compare,
+		// not a raw-instant compare. Reducing both operands to calendar-date
+		// granularity keeps "effective-from is inclusive" honest for any caller —
+		// including one whose travelDate carries a non-midnight clock or a non-UTC
+		// location. Without this, a traveller whose calendar travel date is exactly
+		// the in-force date but whose underlying instant differs from the UTC-midnight
+		// EffectiveFrom would be wrongly flipped to NOT_YET_IN_FORCE (or vice versa).
+		if beforeCalendarDate(travelDate, r.EffectiveFrom) {
 			sig.Status = StatusNotYetInForce // wave not yet in force for this nationality
 		} else {
-			sig.Status = StatusRequired // effective-from is inclusive
+			sig.Status = StatusRequired // effective-from is inclusive (calendar date)
 		}
 		return sig, true
 	}
 	return sig, false
+}
+
+// beforeCalendarDate reports whether the calendar date of a is strictly earlier
+// than the calendar date of b. Each operand is reduced to its own year/month/day
+// (via time.Time.Date(), in the time's own location), so the comparison ignores
+// the time-of-day component entirely — matching the calendar-date contract of a
+// gov.uk-published effective-from wave date and of a traveller's calendar travel
+// date. Equal calendar dates are NOT before (the inclusive boundary). This is a
+// pure value comparison, allocation-free and race-safe.
+func beforeCalendarDate(a, b time.Time) bool {
+	ay, am, ad := a.Date()
+	by, bm, bd := b.Date()
+	if ay != by {
+		return ay < by
+	}
+	if am != bm {
+		return am < bm
+	}
+	return ad < bd
 }
 
 // SeedTable is an ILLUSTRATIVE, NON-AUTHORITATIVE sample of rollout waves for
